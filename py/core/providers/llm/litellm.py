@@ -11,7 +11,10 @@ class LiteCompletionProvider(CompletionProvider):
     def __init__(self, config: CompletionConfig, *args, **kwargs) -> None:
         super().__init__(config)
         try:
+            import litellm
             from litellm import acompletion, completion, OllamaConfig
+
+            litellm.set_verbose = True
 
             if config.generation_config.add_generation_kwargs:
                 # We have provider-specific generation arguments, let's set them
