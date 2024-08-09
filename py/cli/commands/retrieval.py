@@ -1,3 +1,5 @@
+import json
+
 import click
 
 from cli.command_group import cli
@@ -56,6 +58,12 @@ from cli.utils.timer import timer
     "--max-llm-queries-for-global-search", type=JSON, help="Max community size"
 )
 @click.option("--local-search-limits", type=JSON, help="Local search limits")
+@click.option(
+    "--use-json-output",
+    is_flag=True,
+    default=False,
+    help="Format output as JSON",
+)
 @click.pass_obj
 def search(client, query, **kwargs):
     """Perform a search query."""
@@ -91,7 +99,7 @@ def search(client, query, **kwargs):
         and v is not None
     }
 
-    with timer():
+    with timer(not kwargs.get("use_json_output")):
         results = client.search(
             query,
             vector_search_settings,
@@ -100,6 +108,11 @@ def search(client, query, **kwargs):
 
         if isinstance(results, dict) and "results" in results:
             results = results["results"]
+
+        if kwargs.get("use_json_output"):
+            json_str = json.dumps(results, ensure_ascii=False, indent=2)
+            click.echo(json_str)
+            return
 
         if "vector_search_results" in results:
             click.echo("Vector search results:")
