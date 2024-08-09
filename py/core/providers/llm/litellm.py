@@ -11,7 +11,10 @@ class LiteCompletionProvider(CompletionProvider):
     def __init__(self, config: CompletionConfig, *args, **kwargs) -> None:
         super().__init__(config)
         try:
+            import litellm
             from litellm import acompletion, completion
+
+            litellm.set_verbose = True
 
             self.acompletion = acompletion
             self.completion = completion
