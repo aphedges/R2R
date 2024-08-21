@@ -1,3 +1,4 @@
+import json
 from typing import Any, Dict
 
 import click
@@ -102,13 +103,24 @@ def delete(client, filter):
     default=None,
     help="The maximum number of nodes to return. Defaults to 100.",
 )
+@click.option(
+    "--use-json-output",
+    is_flag=True,
+    default=False,
+    help="Format output as JSON",
+)
 @click.pass_obj
-def documents_overview(client, document_ids, offset, limit):
+def documents_overview(client, document_ids, offset, limit, use_json_output):
     """Get an overview of documents."""
     document_ids = list(document_ids) if document_ids else None
 
-    with timer():
+    with timer(not use_json_output):
         response = client.documents_overview(document_ids, offset, limit)
+
+    if use_json_output:
+        json_str = json.dumps(response, ensure_ascii=False, indent=2)
+        click.echo(json_str)
+        return
 
     for document in response["results"]:
         click.echo(document)
