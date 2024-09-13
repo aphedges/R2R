@@ -171,6 +171,13 @@ def search(client, query, **kwargs):
     "--max-llm-queries-for-global-search", type=int, help="Max community size"
 )
 @click.option("--local-search-limits", type=JSON, help="Local search limits")
+@click.option(
+    "use_json_output",
+    "--json/--no-json",
+    is_flag=True,
+    default=False,
+    help="Format output as JSON",
+)
 @click.pass_obj
 def rag(client, query, **kwargs):
     """Perform a RAG query."""
@@ -217,13 +224,18 @@ def rag(client, query, **kwargs):
             "model": kg_search_settings.pop("kg_search_model")
         }
 
-    with timer():
+    with timer(not kwargs.get("use_json_output")):
         response = client.rag(
             query,
             rag_generation_config,
             vector_search_settings,
             kg_search_settings,
         )
+
+        if kwargs.get("use_json_output"):
+            json_str = json.dumps(response, ensure_ascii=False, indent=2)
+            click.echo(json_str)
+            return
 
         if rag_generation_config.get("stream"):
             for chunk in response:
