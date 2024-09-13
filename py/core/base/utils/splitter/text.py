@@ -650,8 +650,9 @@ class CharacterTextSplitter(TextSplitter):
             else re.escape(self._separator)
         )
         splits = _split_text_with_regex(text, separator, self._keep_separator)
+        splits = [s.strip() for s in splits]
         _separator = "" if self._keep_separator else self._separator
-        return self._merge_splits(splits, _separator)
+        return splits
 
 
 class LineType(TypedDict):
